@@ -18,7 +18,8 @@ start_time = time.time()
 
 async def get_data():
     cur_time = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
-    with open(f'https://rareplayingcards.com/collections/limited-edition') as file:
+
+    with open(f'rareplayingcards_{cur_time}.csv', "w") as file:
         writer = csv.writer(file)
 
         writer.writerow(
@@ -50,22 +51,32 @@ async def get_data():
                                      headers).text
             soup = BeautifulSoup(card_page, 'lxml')
 
-            for name in soup.find_all('h1', class_='h2'):
-                name = (name.text.strip())
-            for seller in soup.find_all('a', class_='border-bottom-link uppercase'):
-                seller = (seller.text.strip())
-            for price in soup.find_all('span', class_='add-to-cart__price'):
-                price = (price.text.strip())
+            for name in soup.find_all('h2'):
+                try:
+                    name = name.find('h1').text.strip()
+                except:
+                    name = "Название не найдено"
 
-            cards_data.append(
-                {
-                    'Название колоды': name,
-                    'Производитель': seller,
-                    'Цена': price,
-                }
-            )
+            for seller in soup.find_all('border-bottom-link uppercase'):
+                try:
+                    seller = seller.find('a').text.strip()
+                except:
+                    seller = "Производитель не найден"
+            for price in soup.find_all('add-to-cart__price'):
+                try:
+                    price = price.find('span').text.strip()
+                except:
+                    price = "Цена не найдена"
 
-            with open(f'https://rareplayingcards.com/collections/limited-edition{cur_time}.csv', "a") as file:
+                cards_data.append(
+                    {
+                        'name': name,
+                        'seller': seller,
+                        'price': price
+                    }
+                )
+
+            with open(f'rareplayingcards_{cur_time}.csv', "a") as file:
                 writer = csv.writer(file)
 
                 writer.writerow(
@@ -79,7 +90,7 @@ async def get_data():
         print(f"Обработана {page}/{page_count}")
         time.sleep(1)
 
-    with open(f'https://rareplayingcards.com/collections/limited-edition') as file:
+    with open(f'rareplayingcards_{cur_time}.json', "w") as file:
         json.dump(cards_data, file, indent=4, ensure_ascii=False)
 
 
