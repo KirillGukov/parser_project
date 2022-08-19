@@ -24,8 +24,8 @@ async def get_data():
 
         writer.writerow(
             (
-                'Название колоды'
-                'Производитель'
+                'Название колоды',
+                'Производитель',
                 'Цена'
             )
         )
@@ -44,29 +44,36 @@ async def get_data():
         response = requests.get(f'https://rareplayingcards.com/collections/limited-edition?page={page}', headers).text
         soup = BeautifulSoup(response, 'lxml')
 
-        for adr_part in soup.find_all('p', class_='h5--accent strong name_wrapper'):
+        for adr_part in soup.find_all('a', class_='h5--accent strong name_wrapper'):
             card_adr = '-'.join(adr_part.text.split())                           # ДОБАВИТЬ remove('-')
 
             card_page = requests.get(f'https://rareplayingcards.com/collections/limited-edition/products/{card_adr}',
                                      headers).text
             soup = BeautifulSoup(card_page, 'lxml')
 
-            for name in soup.find_all('h1', class_='h2'):
-                name = (name.text.strip())
-            for seller in soup.find_all('a', class_='border-bottom-link uppercase'):
-                seller = (seller.text.strip())
-            for price in soup.find_all('span', class_='add-to-cart__price'):
-                price = (price.text.strip())
+            try:
+                name = soup.find('h1', class_='h2').text.strip()
+            except:
+                name = "Название не найдено"
 
-            cards_data.append(
-                {
-                    'Название колоды': name,
-                    'Производитель': seller,
-                    'Цена': price,
-                }
-            )
+            try:
+                seller = soup.find('a', class_='border-bottom-link uppercase').text.strip()
+            except:
+                seller = "Производитель не найден"
+            try:
+                price = soup.find('span', class_='add-to-cart__price').text.strip()
+            except:
+                price = "Цена не найдена"
 
-            with open(f'rareplayingcards_{cur_time}.csv', "a") as file:
+                cards_data.append(
+                    {
+                        'name': name,
+                        'seller': seller,
+                        'price': price
+                    }
+                )
+
+            with open(f'rareplayingcards_{cur_time}.csv', "a", encoding="utf-8") as file:
                 writer = csv.writer(file)
 
                 writer.writerow(

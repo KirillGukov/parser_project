@@ -24,8 +24,8 @@ async def get_data():
 
         writer.writerow(
             (
-                'Название колоды'
-                'Производитель'
+                'Название колоды',
+                'Производитель',
                 'Цена'
             )
         )
@@ -51,39 +51,39 @@ async def get_data():
                                      headers).text
             soup = BeautifulSoup(card_page, 'lxml')
 
-            for name in soup.find_all('h2'):
-                try:
-                    name = name.find('h1').text.strip()
-                except:
-                    name = "Название не найдено"
+            try:
+                name = soup.find('h1', class_='h2').text.strip()
+            except Exception as e:
+                name = "Название не найдено"
+                print(e)
 
-            for seller in soup.find_all('border-bottom-link uppercase'):
-                try:
-                    seller = seller.find('a').text.strip()
-                except:
-                    seller = "Производитель не найден"
-            for price in soup.find_all('add-to-cart__price'):
-                try:
-                    price = price.find('span').text.strip()
-                except:
-                    price = "Цена не найдена"
+            try:
+                seller = soup.find('a', class_='border-bottom-link uppercase').text.strip()
+            except Exception as e:
+                seller = "Производитель не найден"
+                print(e)
+            try:
+                price = soup.find('span', class_='add-to-cart__price').text.strip()
+            except Exception as e:
+                price = "Цена не найдена"
+                print(e)
 
                 cards_data.append(
                     {
                         'name': name,
                         'seller': seller,
-                        'price': price
+                        'price': price,
                     }
                 )
 
-            with open(f'rareplayingcards_{cur_time}.csv', "a") as file:
+            with open(f'rareplayingcards_{cur_time}.csv', "a", encoding="utf-8") as file:
                 writer = csv.writer(file)
 
                 writer.writerow(
                     (
                         name,
                         seller,
-                        price
+                        price,
                     )
                 )
 
@@ -91,7 +91,8 @@ async def get_data():
         time.sleep(1)
 
     with open(f'rareplayingcards_{cur_time}.json', "w") as file:
-        json.dump(cards_data, file, indent=4, ensure_ascii=False)
+        j_card = json.dumps(cards_data, indent=4, ensure_ascii=False)
+        file.write(j_card)
 
 
 def main():

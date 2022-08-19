@@ -1,10 +1,25 @@
 import requests
 from bs4 import BeautifulSoup
 
-start_page = requests.get('https://rareplayingcards.com/collections/limited-edition?page=1').text
-soup = BeautifulSoup(start_page, 'lxml')
+url = 'https://rareplayingcards.com/collections/limited-edition'
 
-for name in soup.find_all('p', class_='h5--accent strong name_wrapper'):
-    print(name.text.strip())
-for price in soup.find_all('span', class_='price'):
-    print(price.text.strip())
+response = requests.get(url=url)
+soup = BeautifulSoup(response.text, "lxml")
+
+page_count = int(soup.find("ul", class_="pagination-custom").find_all("a")[-2].text)
+
+
+for page in range(1, page_count + 1):
+
+    response = requests.get(f'https://rareplayingcards.com/collections/limited-edition?page={page}').text
+    soup = BeautifulSoup(response, 'lxml')
+
+    for adr_part in soup.find_all('a', class_='lazy-image double__image'):
+        card_adr = (adr_part.text.split())
+
+        print(card_adr)
+
+        card_page = requests.get(f'https://rareplayingcards.com/collections/limited-edition/products/{card_adr}',).text
+        soup = BeautifulSoup(card_page, 'lxml')
+
+        name = soup.find('h1', class_='h2').text.strip()
