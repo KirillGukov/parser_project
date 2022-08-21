@@ -27,9 +27,9 @@ async def get_page_data(session, page):                                         
         all_cards_hrefs = soup.find_all(class_='lazy-image double__image')                                              # парсим все карточки с колодами
 
         for card_adr in all_cards_hrefs:                                                                                # проходим по всем карточкам на странице
-            page = card_adr.get('href')                                                                                 # забираем данные по тэгу href
+            card_data = card_adr.get('href')                                                                            # забираем данные по тэгу href
 
-            card_page = requests.get(f'https://rareplayingcards.com{page}',                                             # отправляем запрос на страницу колоды
+            card_page = requests.get(f'https://rareplayingcards.com{card_data}',                                        # отправляем запрос на страницу колоды
                                      headers).text
             soup = BeautifulSoup(card_page, 'lxml')                                                                     # создаем объект супа
 
@@ -54,7 +54,7 @@ async def get_page_data(session, page):                                         
                     'price': price
                 }
             )
-        print(f'[INFO] Обработал страницу {page}')                                                                      # выводим кол-во обработанных страниц
+    print(f'[INFO] Обработал страницу {page}')                                                                      # выводим кол-во обработанных страниц
 
 
 async def gather_data():                                                                                                # формируем список задач
