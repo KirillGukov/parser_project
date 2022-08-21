@@ -1,105 +1,20 @@
-import json
-import time
 import requests
 from bs4 import BeautifulSoup
-import asyncio
-import datetime
-import csv
 
-main_page = 'https://rareplayingcards.com/collections/limited-edition'
+url = 'https://rareplayingcards.com/collections/limited-edition'
 
-headers = {
-    'Accept': "	*/*",
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0'
-}
+response = requests.get(url=url)
+soup = BeautifulSoup(response.text, "lxml")
 
-start_time = time.time()
+page_count = int(soup.find("ul", class_="pagination-custom").find_all("a")[-2].text)
 
 
-async def get_data():
-    cur_time = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
+for page in range(1, 2):
 
-    with open(f'rareplayingcards_{cur_time}.csv', "w") as file:
-        writer = csv.writer(file)
+    response = requests.get(f'https://rareplayingcards.com/collections/limited-edition?page={page}').text
+    soup = BeautifulSoup(response, 'lxml')
 
-        writer.writerow(
-            (
-                'Название колоды',
-                'Производитель',
-                'Цена'
-            )
-        )
-
-    url = 'https://rareplayingcards.com/collections/limited-edition'
-
-    response = requests.get(url=url)
-    soup = BeautifulSoup(response.text, "lxml")
-
-    page_count = int(soup.find("ul", class_="pagination-custom").find_all("a")[-2].text)
-
-    cards_data = []
-
-    for page in range(1, page_count + 1):
-
-        response = requests.get(f'https://rareplayingcards.com/collections/limited-edition?page={page}', headers).text
-        soup = BeautifulSoup(response, 'lxml')
-
-        for adr_part in soup.find_all('p', class_='h5--accent strong name_wrapper'):
-            card_adr = '-'.join(adr_part.text.split())                           # ДОБАВИТЬ remove('-')
-
-            card_page = requests.get(f'https://rareplayingcards.com/collections/limited-edition/products/{card_adr}',
-                                     headers).text
-            soup = BeautifulSoup(card_page, 'lxml')
-
-            try:
-                name = soup.find('h1', class_='h2').text.strip()
-            except Exception as e:
-                name = "Название не найдено"
-                print(e)
-
-            try:
-                seller = soup.find('a', class_='border-bottom-link uppercase').text.strip()
-            except Exception as e:
-                seller = "Производитель не найден"
-                print(e)
-            try:
-                price = soup.find('span', class_='add-to-cart__price').text.strip()
-            except Exception as e:
-                price = "Цена не найдена"
-                print(e)
-
-                cards_data.append(
-                    {
-                        'name': name,
-                        'seller': seller,
-                        'price': price,
-                    }
-                )
-
-            with open(f'rareplayingcards_{cur_time}.csv', "a", encoding="utf-8") as file:
-                writer = csv.writer(file)
-
-                writer.writerow(
-                    (
-                        name,
-                        seller,
-                        price,
-                    )
-                )
-
-        print(f"Обработана {page}/{page_count}")
-        time.sleep(1)
-
-    with open(f'rareplayingcards_{cur_time}.json', "w") as file:
-        j_card = json.dumps(cards_data, indent=4, ensure_ascii=False)
-        file.write(j_card)
-
-
-def main():
-    asyncio.run(get_data())
-    finish_time = time.time() - start_time
-    print(f"Затраченное на работу время: {finish_time}")
-
-
-if __name__ == '__main__':
-    main()
+    all_cards_hrefs = soup.find_all(class_='lazy-image double__image')
+    for card_adr in all_cards_hrefs:
+        card_href = card_adr.get('href')
+        print(card_href)

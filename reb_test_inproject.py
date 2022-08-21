@@ -44,10 +44,11 @@ async def get_data():
         response = requests.get(f'https://rareplayingcards.com/collections/limited-edition?page={page}', headers).text
         soup = BeautifulSoup(response, 'lxml')
 
-        for adr_part in soup.find_all('a', class_='h5--accent strong name_wrapper'):
-            card_adr = '-'.join(adr_part.text.split())                           # ДОБАВИТЬ remove('-')
+        all_cards_hrefs = soup.find_all(class_='lazy-image double__image')
+        for card_adr in all_cards_hrefs:
+            card_href = card_adr.get('href')
 
-            card_page = requests.get(f'https://rareplayingcards.com/collections/limited-edition/products/{card_adr}',
+            card_page = requests.get(f'https://rareplayingcards.com{card_href}',
                                      headers).text
             soup = BeautifulSoup(card_page, 'lxml')
 
@@ -65,13 +66,13 @@ async def get_data():
             except:
                 price = "Цена не найдена"
 
-                cards_data.append(
-                    {
-                        'name': name,
-                        'seller': seller,
-                        'price': price
-                    }
-                )
+            cards_data.append(
+                {
+                    'name': name,
+                    'seller': seller,
+                    'price': price
+                }
+            )
 
             with open(f'rareplayingcards_{cur_time}.csv', "a", encoding="utf-8") as file:
                 writer = csv.writer(file)
@@ -87,7 +88,7 @@ async def get_data():
         print(f"Обработана {page}/{page_count}")
         time.sleep(1)
 
-    with open(f'rareplayingcards_{cur_time}.json', "w") as file:
+    with open(f'rareplayingcards_{cur_time}.json', "w", encoding="utf-8") as file:
         json.dump(cards_data, file, indent=4, ensure_ascii=False)
 
 
