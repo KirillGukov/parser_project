@@ -7,7 +7,7 @@ import datetime
 import csv
 import aiohttp
 
-cards_data = []                                                                                                         # вносим потом данные по колодам
+cards_data = []                                                                                                         # список для данных по колодам
 start_time = time.time()                                                                                                # задаем время начала скрипта
 
 
