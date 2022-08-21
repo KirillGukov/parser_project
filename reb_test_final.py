@@ -19,7 +19,7 @@ start_time = time.time()
 async def get_data():
     cur_time = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
 
-    with open(f'rareplayingcards_{cur_time}.csv', "w") as file:
+    with open(f'rareplayingcards_.csv', "w") as file:
         writer = csv.writer(file)
 
         writer.writerow(
@@ -74,7 +74,7 @@ async def get_data():
                 }
             )
 
-            with open(f'rareplayingcards_{cur_time}.csv', "a", encoding="utf-8") as file:
+            with open(f'rareplayingcards_.csv', "a", encoding="utf-8") as file:
                 writer = csv.writer(file)
 
                 writer.writerow(
@@ -88,7 +88,7 @@ async def get_data():
         print(f"Обработана {page}/{page_count}")
         time.sleep(1)
 
-    with open(f'rareplayingcards_{cur_time}.json', "w", encoding="utf-8") as file:
+    with open(f'rareplayingcards_.json', "w", encoding="utf-8") as file:
         json.dump(cards_data, file, indent=4, ensure_ascii=False)
 
 
