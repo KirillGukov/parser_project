@@ -54,7 +54,7 @@ async def get_page_data(session, page):                                         
                     'price': price
                 }
             )
-    print(f'[INFO] Обработал страницу {page}')                                                                      # выводим кол-во обработанных страниц
+    print(f'[INFO] Обработал страницу {page}')                                                                          # выводим кол-во обработанных страниц
 
 
 async def gather_data():                                                                                                # формируем список задач
@@ -99,7 +99,7 @@ def main():
 
     for card in cards_data:                                                                                             # проходим по списку словарей колод
 
-        with open(f'rareplayingcards_{cur_time}_async.csv', "a", encoding="utf-8") as file:                             # сохраняем данные по каждой колоде
+        with open(f'rareplayingcards_{cur_time}_async.csv', "a", newline='', encoding="utf-8") as file:                 # сохраняем данные по каждой колоде
             writer = csv.writer(file)                                                                                   # создаем writer-а для записи в csv для данных о колодах
 
             writer.writerow(                                                                                            # выводим данные в столбцы
