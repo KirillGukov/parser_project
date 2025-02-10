@@ -13,13 +13,15 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0'
 }
 
-
 async def fetch(session, url):
     async with session.get(url, headers=headers) as response:
         return await response.text()
 
 
 async def get_card_data(session, card_url):
+    """
+    Gathering data from objects
+    """
     card_page = await fetch(session, card_url)
     soup = BeautifulSoup(card_page, 'html.parser')
 
@@ -35,6 +37,9 @@ async def get_card_data(session, card_url):
 
 
 async def get_page_data(session, page):
+    """
+    Collection objects address
+    """
     url = f'https://rareplayingcards.com/collections/limited-edition?page={page}'
     response_text = await fetch(session, url)
     soup = BeautifulSoup(response_text, 'html.parser')
@@ -53,6 +58,9 @@ async def get_page_data(session, page):
 
 
 async def gather_data():
+    """
+    Getting pages count
+    """
     url = 'https://rareplayingcards.com/collections/limited-edition'
 
     async with aiohttp.ClientSession() as session:
@@ -65,22 +73,22 @@ async def gather_data():
 
 
 def main():
+    """
+    Writing csv and json docs
+    """
     asyncio.run(gather_data())
     cur_time = datetime.datetime.now().strftime("%d_%m_%Y_%H_%M")
 
-    # Запись в CSV
     with open(f'rareplayingcards_{cur_time}_async.csv', "w", newline='', encoding="utf-8") as file:
         writer = csv.writer(file)
         writer.writerow(('Название колоды', 'Производитель', 'Цена'))
         writer.writerows([(card["name"], card["seller"], card["price"]) for card in cards_data])
 
-    # Запись в JSON
     with open(f'rareplayingcards_{cur_time}_async.json', "w", encoding="utf-8") as json_file:
         json.dump(cards_data, json_file, ensure_ascii=False, indent=4)
 
     finish_time = time.time() - start_time
     print(f"Затраченное на работу время: {finish_time:.2f} секунд")
-
 
 if __name__ == "__main__":
     main()
